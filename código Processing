@@ -1,0 +1,119 @@
+import controlP5.*;
+
+ControlP5 cp5;
+
+String mensaje = "";
+String resultado = "";
+int clave = 0;
+int modo = 0;
+
+void setup() {
+  size(600, 380);
+  PFont fuente = createFont("Arial", 16);
+  PFont fuenteBold = createFont("Arial Bold", 14);
+  textFont(fuente);
+  
+  cp5 = new ControlP5(this);
+
+  cp5.addTextfield("Mensaje")
+     .setPosition(30, 40)
+     .setSize(540, 35)
+     .setFont(fuente)
+     .setCaptionLabel("Mensaje:")
+     .setAutoClear(false);
+  cp5.get(Textfield.class, "Mensaje").getCaptionLabel().setColor(color(0));
+  cp5.get(Textfield.class, "Mensaje").getCaptionLabel().setFont(fuenteBold);
+
+  cp5.addTextfield("Clave")
+     .setPosition(30, 95)
+     .setSize(140, 35)
+     .setFont(fuente)
+     .setCaptionLabel("Clave:")
+     .setAutoClear(false)
+     .setInputFilter(ControlP5.INTEGER);
+  cp5.get(Textfield.class, "Clave").getCaptionLabel().setColor(color(0));
+  cp5.get(Textfield.class, "Clave").getCaptionLabel().setFont(fuenteBold);
+
+  DropdownList lista = cp5.addDropdownList("Modo")
+     .setPosition(200, 95)
+     .setSize(180, 80)
+     .setFont(fuente)
+     .addItem("Cifrar", 0)
+     .addItem("Descifrar", 1)
+     .setValue(0);
+
+  lista.getCaptionLabel().set("Modo:");
+  lista.setColorBackground(color(220));
+  lista.setColorActive(color(180));
+  lista.setColorForeground(color(150));
+  lista.setColorValue(color(50));
+  lista.setColorLabel(color(0));
+
+  cp5.addButton("Ejecutar")
+     .setPosition(410, 95)
+     .setSize(75, 35)
+     .setLabel("Ejecutar");
+
+  cp5.addButton("Reiniciar")
+     .setPosition(500, 95)
+     .setSize(70, 35)
+     .setLabel("Limpiar");
+}
+
+void draw() {
+  background(#F4F4F4);
+  fill(#333333);
+  textSize(16);
+  text("Resultado:", 30, 160);
+  text(resultado, 30, 190, width - 60, height - 190);
+}
+
+void Ejecutar() {
+  mensaje = cp5.get(Textfield.class, "Mensaje").getText();
+  String claveTexto = cp5.get(Textfield.class, "Clave").getText();
+
+  if (claveTexto.equals("")) {
+    resultado = "⚠️ Introduce una clave válida.";
+    return;
+  }
+
+  clave = int(claveTexto);
+  modo = int(cp5.get(DropdownList.class, "Modo").getValue());
+
+  if (modo == 0) {
+    resultado = cifradoCesar(mensaje, clave);
+  } else {
+    resultado = cifradoCesar(mensaje, -clave);
+  }
+}
+
+void Reiniciar() {
+  cp5.get(Textfield.class, "Mensaje").setText("");
+  cp5.get(Textfield.class, "Clave").setText("");
+  resultado = "";
+  cp5.get(DropdownList.class, "Modo").setValue(0);
+}
+
+String cifradoCesar(String texto, int k) {
+  String abecedario = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  String abecedarioMin = abecedario.toLowerCase();
+  String salida = "";
+
+  for (int i = 0; i < texto.length(); i++) {
+    char c = texto.charAt(i);
+
+    if (abecedario.indexOf(c) >= 0) {
+      int pos = abecedario.indexOf(c);
+      int nuevaPos = (pos + k + 26) % 26;
+      salida += abecedario.charAt(nuevaPos);
+    } else if (abecedarioMin.indexOf(c) >= 0) {
+      int pos = abecedarioMin.indexOf(c);
+      int nuevaPos = (pos + k + 26) % 26;
+      salida += abecedarioMin.charAt(nuevaPos);
+    } else {
+      salida += c;
+    }
+  }
+
+  return salida;
+}
